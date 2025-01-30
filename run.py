@@ -65,19 +65,65 @@ while row:
     row = cursor.fetchone()
 """
 # Testdaten:
-read = [['2020-08-01', 'abcAltenpflegerjhk'], ['2024-06-07', '123Altenpflegefachkraft123'], ['2025-01-03', 'abcAltenpflegerinabc'], ["2024-01-01", "abcdPflegefachperson123"], ['04.07.2025', '123Krankenpflegerinabc'], ["01.01.2025 17:00:43", "abcd Pflegefachmann 123"], ["12/31/2023", "Krankenschwester12acde"], ["2023-02-01", "abcdPflegefachfrau74"], ["2024-02-02", "Krankenpflegerabcd"], ['2024-03-02', 'aKinderkrankenpflegerb']]
+"""read = [['2020-08-01', 'abcAltenpflegerjhk'], ['2024-06-07', '123Altenpflegefachkraft123'], 
+        ['2025-01-03', 'abcAltenpflegerinabc'], ["2024-01-01", "abcdPflegefachperson123"], 
+        ['04.07.2025', '123Krankenpflegerinabc'], ["01.01.2025 17:00:43", "abcd Pflegefachmann 123"], 
+        ["12/31/2023", "Krankenschwester12acde"], ["2023-02-01", "abcdPflegefachfrau74"], 
+        ["2024-02-02", "Krankenpflegerabcd"], ['2024-03-02', 'aKinderkrankenpflegerb']]"""
+output = [
+        {
+            "date": "2020-08-01",
+            "full_text": "abcAltenpflegerjhk"
+            },
+        {
+            "date": "2024-06-07",
+            "full_text": "123Altenpflegefachkraft123"
+            },
+        {
+            "date": "2025-01-03",
+            "full_text": "abcAltenpflegerinabc"
+            },
+        {
+            "date": "2024-01-01",
+            "full_text": "abcdPflegefachperson123"
+            },
+        {
+            "date": "2025-07-04",
+            "full_text": "123Krankenpflegerinabc"
+            },
+        {
+            "date": "2025-01-01",
+            "full_text": "abcd Pflegefachmann 123"
+            },
+        {
+            "date": "2023-12-31",
+            "full_text": "Krankenschwester12acde"
+            },
+        {
+            "date": "2023-02-01",
+            "full_text": "abcdPflegefachfrau74"
+            },
+        {
+            "date": "2024-02-02",
+            "full_text": "Krankenpflegerabcd"
+            },
+        {
+            "date": "2024-03-02",
+            "full_text": "aKinderkrankenpflegerb"}
+        ]
 # Daten sind jetzt in read[j] gespeichert (als eigene Liste mit [Datum, Volltext]) --> jetzt weiter mit Daten arbeiten
-for k in range(len(read)):
+"""for k in range(len(read)):
     normalize_date = parser.parse(read[k][0]) # Diese + die nächsten drei Zeilen werden nicht benötigt, wenn Datum und Uhrzeit normalisiert vorliegen
     new_date = normalize_date.strftime("%Y-%m-%d %H:%M:%S") # Achtung: Intepretiert NUR amerikanische Schreibweise (MM/DD/YYYY)
     timestamp = datetime.timestamp(normalize_date)
     read[k][0] = timestamp
-read.sort(key=operator.itemgetter(0))
+read.sort(key=operator.itemgetter(0))"""
+read = sorted(output, key=lambda x: x["date"])
 print('Insgesamt '+str(len(read))+' Stellenanzeigen gefunden')
-print('Älteste Anzeige ist von '+str(datetime.fromtimestamp(read[0][0])))
-print('Neuste Anzeige ist von '+str(datetime.fromtimestamp(read[len(read)-1][0])))
+print('Älteste Anzeige ist von '+read[0]["date"])
+print('Neuste Anzeige ist von '+read[len(read)-1]["date"])
 # Verteilung plotten (x=Monat/Jahr, y=Anzahl Stellenanzeigen); zuerst: Monate, Jahre und Anzahlen pro Monat und Jahr extrahieren
-timestamps = [datetime.fromtimestamp(item[0]) for item in read]
+timestamps = [datetime.strptime(item["date"], "%Y-%m-%d") for item in read]
 months = sorted({(ts.year, ts.month) for ts in timestamps})
 month_labels = [datetime(year, month, 1).strftime("%b %Y") for year, month in months]
 month_counts = {month: 0 for month in months}
@@ -136,31 +182,31 @@ for c3_pfp in pfp_ki:
 read_counter = len(read)
 for p in range(len(pfp_kh)):
     for n in range(len(read)):
-        if re.search('.*'+pfp_kh[p]+'.*', read[n][1], flags=re.M|re.I):
-            if re.search('.*'+pfp_ki[p]+'.*', read[n][1], flags=re.M|re.I): 
+        if re.search('.*'+pfp_kh[p]+'.*', read[n]["full_text"], flags=re.M|re.I):
+            if re.search('.*'+pfp_ki[p]+'.*', read[n]["full_text"], flags=re.M|re.I): 
                 counter_ki[p][1] += 1
                 counter_ki_gesamt += 1
-                stellen_full_ki.append([read[n][0], read[n][1]])
-                read[n] = [0, '0']
+                stellen_full_ki.append([read[n]["date"], read[n]["full_text"]])
+                read[n] = {"date": "a", "full_text": "a"}
             else:
                 counter_kh[p][1] += 1
                 counter_kh_gesamt += 1
-                stellen_full_kh.append([read[n][0], read[n][1]])
-                read[n] = [0, '0']
+                stellen_full_kh.append([read[n]["date"], read[n]["full_text"]])
+                read[n] = {"date": "a", "full_text": "a"}
 for q in range(len(pfp_ap)):
     for o in range(len(read)):
-        if re.search('.*'+pfp_ap[q]+'.*', read[o][1], flags=re.M|re.I): 
+        if re.search('.*'+pfp_ap[q]+'.*', read[o]["full_text"], flags=re.M|re.I): 
            counter_ap[q][1] += 1
            counter_ap_gesamt += 1
-           stellen_full_ap.append([read[o][0], read[o][1]])
-           read[o] = [0, '0']
+           stellen_full_ap.append([read[o]["date"], read[o]["full_text"]])
+           read[o] = {"date": "a", "full_text": "a"}
 for l in range(len(pfp_gen)):
     for m in range(len(read)):
-        if re.search('.*'+pfp_gen[l]+'.*', read[m][1], flags=re.M|re.I):
+        if re.search('.*'+pfp_gen[l]+'.*', read[m]["full_text"], flags=re.M|re.I):
             counter_gen[l][1] += 1
             counter_gen_gesamt += 1
-            stellen_full_gen.append([read[m][0], read[m][1]])
-            read[m] = [0, '0']
+            stellen_full_gen.append([read[m]["date"], read[m]["full_text"]])
+            read[m] = {"date": "a", "full_text": "a"}
 del read
 for cb in range(len(pfp_gen)):
     try:
@@ -231,18 +277,26 @@ year_counts_gen = {year: 0 for year in years}
 year_counts_kh = {year: 0 for year in years}
 year_counts_ap = {year: 0 for year in years}
 year_counts_ki = {year: 0 for year in years}
-for ts in [datetime.fromtimestamp(item[0]) for item in stellen_full_gen]:
-    month_counts_gen[(ts.year, ts.month)] += 1
-    year_counts_gen[ts.year] += 1
-for tst in [datetime.fromtimestamp(item[0]) for item in stellen_full_kh]:
-    month_counts_kh[(tst.year, tst.month)] += 1
-    year_counts_kh[tst.year] += 1
-for tsw in [datetime.fromtimestamp(item[0]) for item in stellen_full_ap]:
-    month_counts_ap[(tsw.year, tsw.month)] += 1
-    year_counts_ap[tsw.year] += 1
-for tsx in [datetime.fromtimestamp(item[0]) for item in stellen_full_ki]:
-    month_counts_ki[(tsx.year, tsx.month)] += 1
-    year_counts_ki[tsx.year] += 1
+for item in range(len(stellen_full_gen)):
+    ts = datetime.strptime(stellen_full_gen[item][0], "%Y-%m-%d")   
+    month_counts_gen[(ts.year, ts.month)] = month_counts_gen.get((ts.year, ts.month), 0) + 1
+    year_counts_gen[ts.year] = year_counts_gen.get(ts.year, 0) + 1
+### HIER WEITER
+for itemt in range(len(stellen_full_kh)):
+    ts = datetime.strptime(stellen_full_kh[itemt][0], "%Y-%m-%d")   
+    month_counts_kh[(ts.year, ts.month)] = month_counts_kh.get((ts.year, ts.month), 0) + 1
+    year_counts_kh[ts.year] = year_counts_kh.get(ts.year, 0) + 1
+    year_counts_kh[ts.year] += 1
+for itemk in range(len(stellen_full_ap)):
+    ts = datetime.strptime(stellen_full_ap[itemk][0], "%Y-%m-%d")   
+    month_counts_ap[(ts.year, ts.month)] = month_counts_ap.get((ts.year, ts.month), 0) + 1
+    year_counts_ap[ts.year] = year_counts_kh.get(ts.year, 0) + 1
+    year_counts_ap[ts.year] += 1    
+for iteml in range(len(stellen_full_ki)):
+    ts = datetime.strptime(stellen_full_ki[iteml][0], "%Y-%m-%d")   
+    month_counts_ki[(ts.year, ts.month)] = month_counts_ki.get((ts.year, ts.month), 0) + 1
+    year_counts_ki[ts.year] = year_counts_ki.get(ts.year, 0) + 1
+    year_counts_ki[ts.year] += 1   
 ymonths_gen = list(month_counts_gen.values())
 ymonths_kh = list(month_counts_kh.values())
 ymonths_ap = list(month_counts_ap.values())
