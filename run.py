@@ -12,6 +12,7 @@ from datetime import datetime
 import matplotlib.pyplot as plt
 import numpy as np
 import re
+import json
 """
 # Zugangsdaten SQL-Server
 server = 'srv_name'
@@ -138,9 +139,11 @@ ymonths = [month_counts[month] for month in months]
 fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(16, 8), constrained_layout=True, gridspec_kw={'height_ratios': [1]}) # viermal die eins am ende bei 4x4
 ax = axes
 barone = ax.bar(xmonths, ymonths, color='skyblue', edgecolor='black')
-ax.bar_label(barone)
-ax.set_xticks(xmonths, month_labels, rotation=45)
-ax.margins(y=0.5)
+for rect in barone:
+    height = rect.get_height()
+    ax.text(rect.get_x() + rect.get_width() / 2, height + 0.5, str(height), ha='center', va='bottom')
+ax.set_xticks(xmonths)
+ax.set_xticklabels(month_labels, rotation=45)
 ax.set_xlabel('Monate')
 ax.set_ylabel('Anzahl Stellenanzeigen')
 ax.set_title('Stellenanzeigen pro Monat')
@@ -151,9 +154,11 @@ xyears = np.arange(len(years))
 yyears = [year_counts[year] for year in years]
 ax = axes
 bartwo = ax.bar(xyears, yyears, color='lightgreen', edgecolor='black')
-ax.bar_label(bartwo)
-ax.set_xticks(xyears, years)
-ax.margins(y=0.5)
+for rect in bartwo:
+    height = rect.get_height()
+    ax.text(rect.get_x() + rect.get_width() / 2, height + 0.5, str(height), ha='center', va='bottom')
+ax.set_xticks(xyears)
+ax.set_xticklabels(years, rotation=45)
 ax.set_xlabel('Jahre')
 ax.set_ylabel('Anzahl Stellenanzeigen')
 ax.set_title('Stellenanzeigen pro Jahr')
@@ -281,7 +286,6 @@ for item in range(len(stellen_full_gen)):
     ts = datetime.strptime(stellen_full_gen[item][0], "%Y-%m-%d")   
     month_counts_gen[(ts.year, ts.month)] = month_counts_gen.get((ts.year, ts.month), 0) + 1
     year_counts_gen[ts.year] = year_counts_gen.get(ts.year, 0) + 1
-### HIER WEITER
 for itemt in range(len(stellen_full_kh)):
     ts = datetime.strptime(stellen_full_kh[itemt][0], "%Y-%m-%d")   
     month_counts_kh[(ts.year, ts.month)] = month_counts_kh.get((ts.year, ts.month), 0) + 1
@@ -315,7 +319,8 @@ ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 ax.set_title('Stellenanzeigen pro Monat nach Gruppe der Berufsbezeichnungen')
 ax.set_xlabel('Monate')
 ax.set_ylabel('Anzahl Stellenanzeigen')
-ax.set_xticks(xmonths, month_labels, rotation=45)
+ax.set_xticks(xmonths)
+ax.set_xticklabels(month_labels, rotation=45)
 plt.show()
 # Jetzt noch pro Jahr + Art
 fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(16, 8), constrained_layout=True, gridspec_kw={'height_ratios': [1]}) # viermal die eins am ende bei 4x4
@@ -336,13 +341,21 @@ ax = axes # 3, 0
 xmonths = np.arange(len(month_labels))
 bar_width = 0.2
 barthree = ax.bar(xmonths - 1.5 * bar_width, ymonths_gen, bar_width, color='blue', edgecolor='black', label='Generalistische Berufsbezeichnungen')
-ax.bar_label(barthree, padding=3)
+for rect in barthree:
+    height = rect.get_height()
+    ax.text(rect.get_x() + rect.get_width() / 2, height + 0.1, str(height), ha='center', va='bottom')
 barfour = ax.bar(xmonths - 0.5 * bar_width, ymonths_kh, bar_width, color='red', edgecolor='black', label='Berufsbezeichnungen der Krankenpflege')
-ax.bar_label(barfour, padding=3)
+for rect in barfour:
+    height = rect.get_height()
+    ax.text(rect.get_x() + rect.get_width() / 2, height + 0.1, str(height), ha='center', va='bottom')
 barfive = ax.bar(xmonths + 0.5 * bar_width, ymonths_ap, bar_width, color='green', edgecolor='black', label='Berufsbezeichnungen der Altenpflege')
-ax.bar_label(barfive, padding=3)
+for rect in barfive:
+    height = rect.get_height()
+    ax.text(rect.get_x() + rect.get_width() / 2, height + 0.1, str(height), ha='center', va='bottom')
 barsix = ax.bar(xmonths + 1.5 * bar_width, ymonths_ki, bar_width, color='cyan', edgecolor='black', label='Berufsbezeichnungen der Kinderkrankenpflege')
-ax.bar_label(barsix, padding=3)
+for rect in barsix:
+    height = rect.get_height()
+    ax.text(rect.get_x() + rect.get_width() / 2, height + 0.1, str(height), ha='center', va='bottom')
 ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 ax.margins(y=0.5)
 ax.set_xticks(xmonths)
@@ -350,25 +363,6 @@ ax.set_xticklabels(month_labels, rotation=45)
 ax.set_xlabel('Monate')
 ax.set_ylabel('Anzahl Stellenanzeigen')
 ax.set_title('Stellenanzeigen pro Monat und Gruppe der Berufsbezeichnungen')
-plt.show()
-# ToDo: Kurve: Stellenanzeigen pro Monat nach einzelnen Berufsbezeichnungen
-fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(16, 8), constrained_layout=True, gridspec_kw={'height_ratios': [1]}) # viermal die eins am ende bei 4x4
-ax = axes #3, 1
-bar_width = 0.2
-barthree = ax.bar(xyears - 1.5 * bar_width, yyears_gen, bar_width, color='blue', edgecolor='black', label='Generalistische Berufsbezeichnungen')
-ax.bar_label(barthree, padding=3)
-barfour = ax.bar(xyears - 0.5 * bar_width, yyears_kh, bar_width, color='red', edgecolor='black', label='Berufsbezeichnungen der Krankenpflege')
-ax.bar_label(barfour, padding=3)
-barfive = ax.bar(xyears + 0.5 * bar_width, yyears_ap, bar_width, color='green', edgecolor='black', label='Berufsbezeichnungen der Altenpflege')
-ax.bar_label(barfive, padding=3)
-barsix = ax.bar(xyears + 1.5 * bar_width, yyears_ki, bar_width, color='cyan', edgecolor='black', label='Berufsbezeichnungen der Kinderkrankenpflege')
-ax.bar_label(barsix, padding=3)
-ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
-ax.set_xticks(xyears)
-ax.set_xticklabels(years, rotation=45)
-ax.set_xlabel('Monate')
-ax.set_ylabel('Anzahl Stellenanzeigen')
-ax.set_title('Stellenanzeigen pro Jahr und Gruppe der Berufsbezeichnungen')
 plt.show()
 # ToDo: Bar/Kurve: Stellenanzeigen pro Gruppe pro Jahr/Monat - relativ
 fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(16, 8), constrained_layout=True, gridspec_kw={'height_ratios': [1]}) # viermal die eins am ende bei 4x4
@@ -390,7 +384,8 @@ ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 ax.set_title('Stellenanzeigen pro Jahr nach Gruppe der Berufsbezeichnungen (Relativ: % im jeweiligen Jahr)')
 ax.set_xlabel('Jahre')
 ax.set_ylabel('Anzahl Stellenanzeigen (Anteil in % im jeweiligen Jahr)')
-ax.set_xticks(xyears, years, rotation=45)
+ax.set_xticks(xyears)
+ax.set_xticklabels(years, rotation=45)
 plt.show()
 # Pro Monat
 fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(16, 8), constrained_layout=True, gridspec_kw={'height_ratios': [1]}) # viermal die eins am ende bei 4x4
@@ -405,8 +400,6 @@ for c_yg in range(len(ymonths_gen)):
     rel_ymonths_kh[c_yg] = ymonths_kh[c_yg]/(ymonths_gen[c_yg]+ymonths_ap[c_yg]+ymonths_kh[c_yg]+ymonths_ki[c_yg])
     rel_ymonths_ap[c_yg] = ymonths_ap[c_yg]/(ymonths_gen[c_yg]+ymonths_ap[c_yg]+ymonths_kh[c_yg]+ymonths_ki[c_yg])
     rel_ymonths_ki[c_yg] = ymonths_ki[c_yg]/(ymonths_gen[c_yg]+ymonths_ap[c_yg]+ymonths_kh[c_yg]+ymonths_ki[c_yg])
-fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(16, 8), constrained_layout=True, gridspec_kw={'height_ratios': [1]})
-ax = axes #2, 0
 ax.plot(xmonths, rel_ymonths_gen, 'bo:', linewidth=2, label='Generalistische Berufsbezeichnungen', alpha=0.7)
 ax.plot(xmonths, rel_ymonths_kh, 'ro--', linewidth=2, label='Berufsbezeichnungen der Akutpflege', alpha=0.7)
 ax.plot(xmonths, rel_ymonths_ap, 'go-.', linewidth=2, label='Berufsbezeichnungen der Altenpflege', alpha=0.7)
@@ -415,10 +408,10 @@ ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 ax.set_title('Stellenanzeigen pro Monat nach Gruppe der Berufsbezeichnungen (Relativ: % im jeweiligen Monat)')
 ax.set_xlabel('Monate')
 ax.set_ylabel('Anzahl Stellenanzeigen (Anteil in % im jeweiligen Monat)')
-ax.set_xticks(xmonths, month_labels, rotation=45)
+ax.set_xticks(xmonths)
+ax.set_xticklabels(month_labels, rotation=45)
 plt.show()
 # ToDo: Hochschulisch qualifizierte rausfiltern und darstellen
-# ToDo: Stop-Word-Liste über Volltext laufen lassen und mit Gensim Topics identifizieren (LDA)?
 
 #cursor.close()
 # Verbindung zur Datenbank trennen
